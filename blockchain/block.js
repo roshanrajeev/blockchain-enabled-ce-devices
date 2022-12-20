@@ -8,7 +8,9 @@ class Block {
     }
     toString() {
         return `Block - 
-        
+        Timestamp : ${this.timestamp}
+        Last Hash : ${this.lastHash}
+        Hash : ${this.hash}
         Data : ${this.data}`
     }
 
@@ -16,13 +18,16 @@ class Block {
         return new this('Genesis time', '----', 'genetic-hash', [])
     }
     static hash(timestamp, lastHash, data) {
-        console.log('sha')
+        //console.log(lastHash)
         return SHA256(`${timestamp}${lastHash}${data}`).toString()
     }
     static mineBlock(lastBlock, data) {
         let hash
-        let timestamp
+        let timestamp = Date.now()
+
         const lastHash = lastBlock.hash
+        //console.log(timestamp)
+        hash = Block.hash(timestamp, lastHash, data)
 
         return new this(timestamp, lastHash, hash, data)
     }

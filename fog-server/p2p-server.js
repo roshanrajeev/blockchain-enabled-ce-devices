@@ -1,14 +1,13 @@
 const WebSocket = require('ws')
 
 //declare the peer to peer server port
-const P2P_PORT = process.env.P2P_PORT || 5001
+const P2P_PORT_FOG = process.env.P2P_PORT_FOG || 6001
 
 //list of address to connect to
 const peers = process.env.PEERS ? process.env.PEERS.split(',') : []
 
 class P2pserver {
-    constructor(blockchain) {
-        this.blockchain = blockchain
+    constructor() {
         this.sockets = []
     }
 
@@ -16,7 +15,7 @@ class P2pserver {
 
     listen() {
         // create the p2p server with port as argument
-        const server = new WebSocket.Server({ port: P2P_PORT })
+        const server = new WebSocket.Server({ port: P2P_PORT_FOG })
 
         // event listener and a callback function for any new connection
         // on any new connection the current instance will send the current chain
@@ -26,7 +25,7 @@ class P2pserver {
         // to connect to the peers that we have specified
         this.connectToPeers()
 
-        console.log(`Listening for peer to peer connection on port : ${P2P_PORT}`)
+        console.log(`Listening for peer to peer connection on port : ${P2P_PORT_FOG}`)
     }
 
     // after making connection to a socket
@@ -40,7 +39,7 @@ class P2pserver {
 
         // on new connection send the blockchain chain to the peer
 
-        this.sendChain(socket)
+        this.sendData(socket)
     }
 
     connectToPeers() {
@@ -58,17 +57,16 @@ class P2pserver {
     messageHandler(socket) {
         //on recieving a message execute a callback function
         socket.on('message', (message) => {
-            const data = JSON.parse(message)
-            console.log('data ', data)
-            this.blockchain.replaceChain(data)
+            // const data = JSON.parse(message.toString())
+            console.log('data ', String(message))
         })
     }
     /**
      * helper function to send the chain instance
      */
 
-    sendChain(socket) {
-        socket.send(JSON.stringify(this.blockchain.chain))
+    sendData(socket, data) {
+        socket.send(JSON.stringify(data))
     }
 
     /**
@@ -77,9 +75,9 @@ class P2pserver {
      * the blockchain
      */
 
-    syncChain() {
+    broadcast(data) {
         this.sockets.forEach((socket) => {
-            this.sendChain(socket)
+            this.sendData(socket, data)
         })
     }
 }

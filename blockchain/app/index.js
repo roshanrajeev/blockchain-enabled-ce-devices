@@ -34,3 +34,12 @@ app.post('/mine', (req, res) => {
 app.listen(HTTP_PORT, () => {
     console.log(`listening on port ${HTTP_PORT}`)
 })
+
+module.exports = {
+    mineBlock: (data) => {
+        const block = blockchain.addBlock(data)
+        console.log(`New block added: ${block.toString()}`)
+        p2pserver.syncChain()
+        res.redirect('/blocks')
+    }
+}

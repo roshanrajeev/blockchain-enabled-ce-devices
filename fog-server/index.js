@@ -2,15 +2,21 @@ const express = require('express');
 var bodyParser = require('body-parser');
 const cors = require('cors');
 const { response } = require('express');
+const P2pServer = require('./p2p-server')
+
+//get the port from the user or set the default port
+const HTTP_PORT = process.env.HTTP_PORT || 3000
+
+const p2pserver = new P2pServer()
+p2pserver.listen()
 
 const fetch = (...args) =>
 	import('node-fetch').then(({default: fetch}) => fetch(...args));
 
 const app = express();
-app.use(cors());
 
-// Configuring body parser middleware
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cors());
+app.use(bodyParser.urlencoded({ extended: false })); // Configuring body parser middleware
 app.use(bodyParser.json());
 
 app.post('/getsensordata', async (req, res) => {
@@ -44,12 +50,13 @@ app.post('/getsensordata', async (req, res) => {
     }
 });
 
-app.listen(3000, () => {
-    console.log('Server is running on port 3000');
-});
-
 app.get('/',function(req,res){
     res.send("Server is up and listening");
 });
+
+app.listen(HTTP_PORT, () => {
+    console.log(`Server listening on port ${HTTP_PORT}`);
+});
+
 
 

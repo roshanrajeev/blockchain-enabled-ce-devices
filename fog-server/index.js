@@ -1,5 +1,6 @@
 const express = require('express')
 const bodyParser = require('body-parser')
+const cors = require('cors')
 
 const P2pServer = require('./p2p-server')
 const { default: axios } = require('axios')
@@ -12,12 +13,18 @@ const app = express()
 //using the body parser middleware
 app.use(bodyParser.json())
 
+app.use(cors({
+    origin: "*"
+}))
+
 // create a new blockchain instance
 const p2pserver = new P2pServer()
 
 p2pserver.listen()
 
-app.post("/hey", (req, res) => {
+// app.get("/heyy", (req, res) => {res.statusCode(200)})
+
+app.post("/heyy", (req, res) => {
     axios({
         method: "post",
         url: `http://localhost:${String(HTTP_PORT_CHAIN).trim()}/mine`,
@@ -29,6 +36,12 @@ app.post("/hey", (req, res) => {
     .then(() => console.log("data added to blockchain"))
     const data = req.body.data
     p2pserver.broadcast(data)
+    const val = 4096 - (((data - 0)/(2500 - 0)) * (4096 - 0) + 0) 
+    axios({
+        method: "get",
+        url: `http://192.168.1.100/update/?data=${val}`
+    })
+    .then("data forwarded to reactor")
     res.sendStatus(200);
 })
 

@@ -1,11 +1,7 @@
 const express = require('express')
 const bodyParser = require('body-parser')
-<<<<<<< HEAD
 const cors = require('cors')
-
-=======
 const db = require("./database")
->>>>>>> 70faffa92bfb50be3b211b533ddb6ce701401f54
 const P2pServer = require('./p2p-server')
 const { default: axios } = require('axios')
 

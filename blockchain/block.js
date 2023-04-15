@@ -7,11 +7,12 @@ class Block {
         this.data = data
     }
     toString() {
-        return `Block - 
-        Timestamp : ${this.timestamp}
-        Last Hash : ${this.lastHash}
-        Hash : ${this.hash}
-        Data : ${this.data}`
+        return JSON.stringify({
+            timestamp: this.timestamp,
+            lastHash: this.lastHash,
+            hash: this.hash,
+            data: this.data
+        })
     }
 
     static genesis() {

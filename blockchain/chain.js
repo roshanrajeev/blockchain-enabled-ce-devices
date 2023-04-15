@@ -1,12 +1,15 @@
 const Block = require('./block')
-
+const { connectToMongoDB } = require('./config/db.js')
 class Blockchain {
     constructor() {
         this.chain = [Block.genesis()]
     }
-    addBlock(data) {
+    async addBlock(data) {
         const block = Block.mineBlock(this.chain[this.chain.length - 1], data)
         this.chain.push(block)
+        const db = await connectToMongoDB()
+        const collection = db.collection('sensor-data')
+        await collection.insertOne(block)
 
         return block
     }

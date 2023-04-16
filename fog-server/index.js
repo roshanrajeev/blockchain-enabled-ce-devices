@@ -38,21 +38,27 @@ app.post("/heyy", async (req, res) => {
             const params = [t];
             await new Promise((resolve, reject) => {
                 db.all(sql, params, (err, rows) => {
-                    rows.forEach(row => {
-                        if (err) {
-                            console.error(err);
-                            reject(err);
-                        } else {
-                            if(row) ip_list.push(row.ip);
-                            resolve();
-                        }
-                    })
+                    if (err) {
+                        console.error(err);
+                        reject(err);
+                    }
+                    else {
+                        rows.forEach(row => {
+                            if(row) 
+                                ip_list.push(row.ip);
+                        })
+                        resolve();
+                    }
                 });
             });
         }
     }
     console.log(ip_list);
-    res.sendStatus(200);
+    const val = 4096 - (((data - 0)/(2500 - 0)) * (4096 - 0) + 0) 
+    ip_list.forEach(async (ip)=>{
+        console.log(`http://${ip}/update/?data=${val}`)
+    })
+    return res.sendStatus(200);
 });
 
 // app.post("/heyy", async (req, res) => {

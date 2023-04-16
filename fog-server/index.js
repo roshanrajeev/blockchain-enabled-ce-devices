@@ -27,49 +27,76 @@ const associations = {'ldr':['light_bulb'],'camera':['light_bulb','tv']}
 // app.get("/heyy", (req, res) => {res.statusCode(200)})
 
 app.post("/heyy", async (req, res) => {
-    // axios({
-    //     method: "post",
-    //     url: `http://localhost:${String(HTTP_PORT_CHAIN).trim()}/mine`,
-    //     data: JSON.stringify(req.body),
-    //     headers: {
-    //         'Content-Type': 'application/json'
-    //     }
-    // })
-    // .then(() => console.log("data added to blockchain"))
-    const data = req.body.data
-    const type = req.body.type
-    const index = Object.keys(associations).find((association)=> (association===type))
-    // console.log(Object.keys(associations).findIndex(key=> key==='camera'))
-    let ip_list = []
-    for(const t of associations[index]){
-        var sql = "SELECT ip from iot WHERE type=?";
-        var params = [t]   
-        await db.get(sql, params, (err, row) => {
-            if (err) {
-            //   res.status(400).json({"error":err.message});
-            console.log(err)
-              return;
-            }
-            console.log(row.ip)
-        ip_list.push(row.ip) 
-        });      
+    const data = req.body.data;
+    const type = req.body.type;
+    const index = Object.keys(associations).find((association) => (association === type));
+
+    const ip_list = [];
+    for (const t of associations[index]) {
+        const sql = "SELECT ip from iot WHERE type=?";
+        const params = [t];
+        await new Promise((resolve, reject) => {
+            db.get(sql, params, (err, row) => {
+                if (err) {
+                    console.error(err);
+                    reject(err);
+                } else {
+                    if(row) ip_list.push(row.ip);
+                    resolve();
+                }
+            });
+        });
     }
-    // associations[index].forEach(t => {
-        
-    // }); 
-    console.log(ip_list)                  
-    // p2pserver.broadcast(data)
-    // const val = 4096 - (((data - 0)/(2500 - 0)) * (4096 - 0) + 0) 
-    // ip_list.forEach((ip_val)=>{
-    //     axios({
-    //         method: "get",
-    //         url: `http://${ip_val}/update/?data=${val}`
-    //     })
-    //     .then(()=>console.log(`data forwarded to ip ${ip_val}`))
-    //     .catch((err)=>console.log(err))
-    // })
+    console.log(ip_list);
     res.sendStatus(200);
-})
+});
+
+// app.post("/heyy", async (req, res) => {
+//     // axios({
+//     //     method: "post",
+//     //     url: `http://localhost:${String(HTTP_PORT_CHAIN).trim()}/mine`,
+//     //     data: JSON.stringify(req.body),
+//     //     headers: {
+//     //         'Content-Type': 'application/json'
+//     //     }
+//     // })
+//     // .then(() => console.log("data added to blockchain"))
+//     const data = req.body.data
+//     const type = req.body.type
+//     const index = Object.keys(associations).find((association)=> (association===type))
+//     // console.log(Object.keys(associations).findIndex(key=> key==='camera'))
+//     let ip_list = []
+//     for(const t of associations[index]){
+//         // console.log(t)
+//         const sql = "SELECT * FROM iot WHERE type=?";
+//         const params = [t]
+//         console.log({sql, params});
+//         const row = await db.get(sql, params, (err, row) => {
+//             if (err) {
+//                 console.error(err.message);
+//                 return;
+//             }
+//             console.log(row);
+//         })
+//         console.log(row)
+//         ip_list.push(row.ip)
+//     }
+//     // associations[index].forEach(t => {
+        
+//     // }); 
+//     console.log(ip_list)                  
+//     // p2pserver.broadcast(data)
+//     // const val = 4096 - (((data - 0)/(2500 - 0)) * (4096 - 0) + 0) 
+//     // ip_list.forEach((ip_val)=>{
+//     //     axios({
+//     //         method: "get",
+//     //         url: `http://${ip_val}/update/?data=${val}`
+//     //     })
+//     //     .then(()=>console.log(`data forwarded to ip ${ip_val}`))
+//     //     .catch((err)=>console.log(err))
+//     // })
+//     res.sendStatus(200);
+// })
 
 app.post("/login", (req, res, next) => {
     var errors=[]

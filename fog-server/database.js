@@ -11,6 +11,8 @@ let db = new sqlite3.Database(DBSOURCE, (err) => {
         db.run(`CREATE TABLE iot (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             iotid INTEGER UNIQUE, 
+            type TEXT,
+            ip TEXT,
             CONSTRAINT iotid_unique UNIQUE (iotid)
             )`,
         (err) => {

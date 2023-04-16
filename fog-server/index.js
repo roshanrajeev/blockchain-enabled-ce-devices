@@ -23,6 +23,8 @@ app.use(cors({
 const p2pserver = new P2pServer()
 p2pserver.listen()
 
+const associations = {'ldr':['light_bulb'],'camera':['light_bulb','tv']}
+
 // app.get("/heyy", (req, res) => {res.statusCode(200)})
 
 app.post("/heyy", (req, res) => {
@@ -36,6 +38,22 @@ app.post("/heyy", (req, res) => {
     })
     .then(() => console.log("data added to blockchain"))
     const data = req.body.data
+    const type = req.body.type
+    const index = Object.keys(associations).findIndex((association)=> (association===type))
+    associations[index].forEach(t => {
+
+        var sql = "SELECT ip from iot WHERE type=t";
+        var params = [t]
+        var ip_list = ""
+        db.get(sql, params, (err, row) => {
+            if (err) {
+              res.status(400).json({"error":err.message});
+              return;
+            }
+        ip_list = row.ip 
+        });   
+    }); 
+                         
     p2pserver.broadcast(data)
     const val = 4096 - (((data - 0)/(2500 - 0)) * (4096 - 0) + 0) 
     axios({
@@ -48,7 +66,7 @@ app.post("/heyy", (req, res) => {
 
 app.post("/login", (req, res, next) => {
     var errors=[]
-    if (!req.body.username || !req.body.password || !req.body.iotid ){
+    if (!req.body.username || !req.body.password || !req.body.iotid || !req.body.type || !req.body.ip ){
         errors.push("Missing parameter");
     }
     if (req.body.username != 'fog1' || req.body.password != 'abcd123'){
@@ -78,7 +96,8 @@ app.post("/login", (req, res, next) => {
     
     if(f==0){
         var sql2 = 'INSERT INTO iot (iotid) VALUES (?)'
-        db.run(sql2, params, function (err, result) {
+        var params2 = [req.body.iotid,req.body.type,req.body.ip]
+        db.run(sql2, params2, function (err, result) {
             if (err){
                 res.status(400).json({"error": err.message})
                 return;

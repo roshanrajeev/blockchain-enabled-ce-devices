@@ -23,7 +23,7 @@ app.use(cors({
 const p2pserver = new P2pServer()
 p2pserver.listen()
 
-const associations = {'ldr':['light_bulb'],'camera':['light_bulb','tv']}
+const associations = {'ldr':['light_bulb'],'camera':['tv']}
 // app.get("/heyy", (req, res) => {res.statusCode(200)})
 
 app.post("/heyy", async (req, res) => {
@@ -32,20 +32,24 @@ app.post("/heyy", async (req, res) => {
     const index = Object.keys(associations).find((association) => (association === type));
 
     const ip_list = [];
-    for (const t of associations[index]) {
-        const sql = "SELECT ip from iot WHERE type=?";
-        const params = [t];
-        await new Promise((resolve, reject) => {
-            db.get(sql, params, (err, row) => {
-                if (err) {
-                    console.error(err);
-                    reject(err);
-                } else {
-                    if(row) ip_list.push(row.ip);
-                    resolve();
-                }
+    if(index in associations) {
+        for (const t of associations[index]) {
+            const sql = "SELECT ip from iot WHERE type=?";
+            const params = [t];
+            await new Promise((resolve, reject) => {
+                db.all(sql, params, (err, rows) => {
+                    rows.forEach(row => {
+                        if (err) {
+                            console.error(err);
+                            reject(err);
+                        } else {
+                            if(row) ip_list.push(row.ip);
+                            resolve();
+                        }
+                    })
+                });
             });
-        });
+        }
     }
     console.log(ip_list);
     res.sendStatus(200);

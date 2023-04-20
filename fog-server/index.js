@@ -24,13 +24,36 @@ const p2pserver = new P2pServer()
 p2pserver.listen()
 
 const associations = {'ldr':['light_bulb'],'camera':['tv']}
-// app.get("/heyy", (req, res) => {res.statusCode(200)})
+
+async function Is_Iot_Present(iot_id) {
+    var f=0;
+    var sql1 = "SELECT COUNT(*) as count FROM iot WHERE iotid = ?";
+    var params = [iot_id]
+    await new Promise((resolve, reject) => {
+    db.get(sql1, params, (err, row) => {
+        if (err) {
+          res.status(400).json({"error":err.message});
+          reject();
+        }
+        f=row.count
+        resolve();
+      }); 
+    }); 
+    return f
+}
 
 app.post("/heyy", async (req, res) => {
     const data = req.body.data;
     const type = req.body.type;
-    const index = Object.keys(associations).find((association) => (association === type));
+    const iotid = req.body.iotid;
 
+    var f = await Is_Iot_Present(iotid)
+    if(f==0){
+        res.json({
+            "Error": "Iot Device not Existed !!",
+        }) 
+    }
+    const index = Object.keys(associations).find((association) => (association === type));
     const ip_list = [];
     if(index in associations) {
         for (const t of associations[index]) {
@@ -61,54 +84,7 @@ app.post("/heyy", async (req, res) => {
     return res.sendStatus(200);
 });
 
-// app.post("/heyy", async (req, res) => {
-//     // axios({
-//     //     method: "post",
-//     //     url: `http://localhost:${String(HTTP_PORT_CHAIN).trim()}/mine`,
-//     //     data: JSON.stringify(req.body),
-//     //     headers: {
-//     //         'Content-Type': 'application/json'
-//     //     }
-//     // })
-//     // .then(() => console.log("data added to blockchain"))
-//     const data = req.body.data
-//     const type = req.body.type
-//     const index = Object.keys(associations).find((association)=> (association===type))
-//     // console.log(Object.keys(associations).findIndex(key=> key==='camera'))
-//     let ip_list = []
-//     for(const t of associations[index]){
-//         // console.log(t)
-//         const sql = "SELECT * FROM iot WHERE type=?";
-//         const params = [t]
-//         console.log({sql, params});
-//         const row = await db.get(sql, params, (err, row) => {
-//             if (err) {
-//                 console.error(err.message);
-//                 return;
-//             }
-//             console.log(row);
-//         })
-//         console.log(row)
-//         ip_list.push(row.ip)
-//     }
-//     // associations[index].forEach(t => {
-        
-//     // }); 
-//     console.log(ip_list)                  
-//     // p2pserver.broadcast(data)
-//     // const val = 4096 - (((data - 0)/(2500 - 0)) * (4096 - 0) + 0) 
-//     // ip_list.forEach((ip_val)=>{
-//     //     axios({
-//     //         method: "get",
-//     //         url: `http://${ip_val}/update/?data=${val}`
-//     //     })
-//     //     .then(()=>console.log(`data forwarded to ip ${ip_val}`))
-//     //     .catch((err)=>console.log(err))
-//     // })
-//     res.sendStatus(200);
-// })
-
-app.post("/login", (req, res, next) => {
+app.post("/login", async (req, res, next) => {
     var errors=[]
     if (!req.body.username || !req.body.password || !req.body.iotid || !req.body.type || !req.body.ip ){
         errors.push("Missing parameter");
@@ -122,22 +98,8 @@ app.post("/login", (req, res, next) => {
     }
     console.log("Sucessfully authenticated")
 
-    var f=0;
-    var sql1 = "SELECT COUNT(*) as count FROM iot WHERE iotid = ?";
-    var params = [req.body.iotid]
-    db.get(sql1, params, (err, row) => {
-        if (err) {
-          res.status(400).json({"error":err.message});
-          return;
-        }
-        f=row.count
-        if(f==1){
-            res.json({
-                "message": "success - Iot device already registered",
-            })
-        }
-      });
-    
+   var f= await Is_Iot_Present(req.body.iotid)
+
     if(f==0){
         var sql2 = 'INSERT INTO iot (iotid,type,ip) VALUES (?,?,?)'
         var params2 = [req.body.iotid,req.body.type,req.body.ip]
@@ -150,6 +112,11 @@ app.post("/login", (req, res, next) => {
                 "message": "success - Iot device added",
             })
         });
+    }
+    else{
+        res.json({
+            "message": "success - Iot device already registered",
+        })
     }
 })
 

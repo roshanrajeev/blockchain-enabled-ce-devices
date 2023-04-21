@@ -42,6 +42,35 @@ async function Is_Iot_Present(iot_id) {
     return f
 }
 
+app.get("/list/:type", async (req,res) =>{
+    const index = Object.keys(associations).find((association) => (association === req.params.type));
+    const iot_list = [];
+    if(index in associations) {
+        for (const t of associations[index]) {
+            const sql = "SELECT iotid from iot WHERE type=?";
+            const params = [t];
+            await new Promise((resolve, reject) => {
+                db.all(sql, params, (err, rows) => {
+                    if (err) {
+                        console.error(err);
+                        reject(err);
+                    }
+                    else {
+                        rows.forEach(row => {
+                            if(row) 
+                                iot_list.push(row.iotid);
+                        })
+                        resolve();
+                    }
+                });
+            });
+        }
+    }
+    //console.log(iot_list);
+    res.send(iot_list)
+})
+
+
 app.post("/heyy", async (req, res) => {
     const data = req.body.data;
     const type = req.body.type;
@@ -53,6 +82,7 @@ app.post("/heyy", async (req, res) => {
             "Error": "Iot Device not Existed !!",
         }) 
     }
+
     const index = Object.keys(associations).find((association) => (association === type));
     const ip_list = [];
     if(index in associations) {
@@ -98,8 +128,19 @@ app.post("/login", async (req, res, next) => {
     }
     console.log("Sucessfully authenticated")
 
-   var f= await Is_Iot_Present(req.body.iotid)
-
+    const iot_list = req.body.list
+    iot_list.forEach((iot_id)=>{
+        var sql1 = 'INSERT INTO iot_recipient (senderid,receiverid) VALUES (?,?)'
+        var params1 = [req.body.iotid,iot_id]
+        db.run(sql1, params1, function (err, result) {
+            if (err){
+                res.status(400).json({"error": err.message})
+                return;
+            }
+        });
+    })
+    
+    var f= await Is_Iot_Present(req.body.iotid)
     if(f==0){
         var sql2 = 'INSERT INTO iot (iotid,type,ip) VALUES (?,?,?)'
         var params2 = [req.body.iotid,req.body.type,req.body.ip]
@@ -138,3 +179,50 @@ app.get("/data", (req, res, next) => {
 app.listen(HTTP_PORT_FOG, () => {
     console.log('Server is running on port ' + HTTP_PORT_FOG)
 })
+
+// app.post("/heyy", async (req, res) => {
+//     // axios({
+//     //     method: "post",
+//     //     url: `http://localhost:${String(HTTP_PORT_CHAIN).trim()}/mine`,
+//     //     data: JSON.stringify(req.body),
+//     //     headers: {
+//     //         'Content-Type': 'application/json'
+//     //     }
+//     // })
+//     // .then(() => console.log("data added to blockchain"))
+//     const data = req.body.data
+//     const type = req.body.type
+//     const index = Object.keys(associations).find((association)=> (association===type))
+//     // console.log(Object.keys(associations).findIndex(key=> key==='camera'))
+//     let ip_list = []
+//     for(const t of associations[index]){
+//         // console.log(t)
+//         const sql = "SELECT * FROM iot WHERE type=?";
+//         const params = [t]
+//         console.log({sql, params});
+//         const row = await db.get(sql, params, (err, row) => {
+//             if (err) {
+//                 console.error(err.message);
+//                 return;
+//             }
+//             console.log(row);
+//         })
+//         console.log(row)
+//         ip_list.push(row.ip)
+//     }
+//     // associations[index].forEach(t => {
+        
+//     // }); 
+//     console.log(ip_list)                  
+//     // p2pserver.broadcast(data)
+//     // const val = 4096 - (((data - 0)/(2500 - 0)) * (4096 - 0) + 0) 
+//     // ip_list.forEach((ip_val)=>{
+//     //     axios({
+//     //         method: "get",
+//     //         url: `http://${ip_val}/update/?data=${val}`
+//     //     })
+//     //     .then(()=>console.log(`data forwarded to ip ${ip_val}`))
+//     //     .catch((err)=>console.log(err))
+//     // })
+//     res.sendStatus(200);
+// })

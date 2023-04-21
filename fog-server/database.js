@@ -17,7 +17,19 @@ let db = new sqlite3.Database(DBSOURCE, (err) => {
             )`,
         (err) => {
             if (err) {
-                console.log('Table already existed')    // Table already created
+                console.log('Table iot already existed')    // Table already created
+            }
+        });  
+
+        db.run(`CREATE TABLE iot_recipient (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            senderid INTEGER, 
+            receiverid INTEGER,
+            CONSTRAINT fk_iot FOREIGN KEY (senderid,receiverid) REFERENCES iot(iotid,iotid)
+            )`,
+        (err) => {
+            if (err) {
+                console.log('Table iot_recipient already existed')    // Table already created
             }
         });  
     }

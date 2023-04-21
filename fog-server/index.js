@@ -42,6 +42,8 @@ async function Is_Iot_Present(iot_id) {
     return f
 }
 
+
+
 app.get("/list/:type", async (req,res) =>{
     const index = Object.keys(associations).find((association) => (association === req.params.type));
     const iot_list = [];
@@ -83,12 +85,9 @@ app.post("/heyy", async (req, res) => {
         }) 
     }
 
-    const index = Object.keys(associations).find((association) => (association === type));
     const ip_list = [];
-    if(index in associations) {
-        for (const t of associations[index]) {
-            const sql = "SELECT ip from iot WHERE type=?";
-            const params = [t];
+    const sql = "SELECT ip FROM iot JOIN iot_recipient ON iot_recipient.receiverid = iot.iotid WHERE iot_recipient.senderid = ?";
+            const params = [iotid];
             await new Promise((resolve, reject) => {
                 db.all(sql, params, (err, rows) => {
                     if (err) {
@@ -104,9 +103,8 @@ app.post("/heyy", async (req, res) => {
                     }
                 });
             });
-        }
-    }
-    console.log(ip_list);
+    console.log(ip_list)
+
     const val = 4096 - (((data - 0)/(2500 - 0)) * (4096 - 0) + 0) 
     ip_list.forEach(async (ip)=>{
         console.log(`http://${ip}/update/?data=${val}`)

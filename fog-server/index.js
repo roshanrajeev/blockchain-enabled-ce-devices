@@ -1,9 +1,12 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const cors = require('cors')
+const { default: axios } = require('axios')
+
+require('dotenv').config()
+
 const db = require("./database")
 const P2pServer = require('./p2p-server')
-const { default: axios } = require('axios')
 
 //get the port from the user or set the default port
 const HTTP_PORT_FOG = process.env.HTTP_PORT_FOG || 8001
@@ -80,7 +83,7 @@ app.post("/heyy", async (req, res) => {
 
     var f = await Is_Iot_Present(iotid)
     if(f==0){
-        return res.statusCode(400).json({
+        return res.status(400).json({
             "Error": "Iot Device not Existed !!",
         }) 
     }

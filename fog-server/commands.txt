@@ -1,5 +1,0 @@
-set HTTP_PORT=3000 && set P2P_PORT=4000 && set PEERS=ws://localhost:4002,ws://localhost:4001 && yarn run start
-set HTTP_PORT=3001 && set P2P_PORT=4001 && set PEERS=ws://localhost:4002,ws://localhost:4000 && yarn run start
-set HTTP_PORT=3002 && set P2P_PORT=4002 && set PEERS=ws://localhost:4000,ws://localhost:4001 && yarn run start
-
-cd Final Project/blockchain-enabled-ce-devices/fog-server

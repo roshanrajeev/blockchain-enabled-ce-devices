@@ -80,29 +80,29 @@ app.post("/heyy", async (req, res) => {
 
     var f = await Is_Iot_Present(iotid)
     if(f==0){
-        res.json({
+        return res.statusCode(400).json({
             "Error": "Iot Device not Existed !!",
         }) 
     }
 
     const ip_list = [];
     const sql = "SELECT ip FROM iot JOIN iot_recipient ON iot_recipient.receiverid = iot.iotid WHERE iot_recipient.senderid = ?";
-            const params = [iotid];
-            await new Promise((resolve, reject) => {
-                db.all(sql, params, (err, rows) => {
-                    if (err) {
-                        console.error(err);
-                        reject(err);
-                    }
-                    else {
-                        rows.forEach(row => {
-                            if(row) 
-                                ip_list.push(row.ip);
-                        })
-                        resolve();
-                    }
-                });
-            });
+    const params = [iotid];
+    await new Promise((resolve, reject) => {
+        db.all(sql, params, (err, rows) => {
+            if (err) {
+                console.error(err);
+                reject(err);
+            }
+            else {
+                rows.forEach(row => {
+                    if(row) 
+                        ip_list.push(row.ip);
+                })
+                resolve();
+            }
+        });
+    });
     console.log(ip_list)
 
     const val = 4096 - (((data - 0)/(2500 - 0)) * (4096 - 0) + 0) 

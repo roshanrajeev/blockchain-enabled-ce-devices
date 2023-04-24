@@ -12,6 +12,9 @@ const P2pServer = require('./p2p-server')
 const HTTP_PORT_FOG = process.env.HTTP_PORT_FOG || 8001
 const HTTP_PORT_CHAIN = process.env.HTTP_PORT_CHAIN || 3001
 
+const USERNAME = "fog"
+const PASSWORD = "12345678"
+
 //create a new app
 const app = express()
 //using the body parser middleware
@@ -120,7 +123,7 @@ app.post("/login", async (req, res, next) => {
     if (!req.body.username || !req.body.password || !req.body.iotid || !req.body.type || !req.body.ip ){
         errors.push("Missing parameter");
     }
-    if (req.body.username != 'fog1' || req.body.password != 'abcd123'){
+    if (req.body.username != USERNAME || req.body.password != PASSWORD){
         errors.push("Invalid username/password");
     }
     if (errors.length){
@@ -129,7 +132,7 @@ app.post("/login", async (req, res, next) => {
     }
     console.log("Sucessfully authenticated")
 
-    const iot_list = req.body.list
+    const iot_list = req.body.list || []
     iot_list.forEach((iot_id)=>{
         var sql1 = 'INSERT INTO iot_recipient (senderid,receiverid) VALUES (?,?)'
         var params1 = [req.body.iotid,iot_id]

@@ -80,6 +80,15 @@ app.get("/list/:type", async (req,res) =>{
 
 
 app.post("/heyy", async (req, res) => {
+    axios({
+        method: "POST",
+        url: `http://localhost:${String(HTTP_PORT_CHAIN).trim()}/mine`,
+        data: JSON.stringify(req.body),
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(() => console.log("data added to blockchain"))
     const data = req.body.data;
     const type = req.body.type;
     const iotid = req.body.iotid;
@@ -110,10 +119,17 @@ app.post("/heyy", async (req, res) => {
         });
     });
     console.log(ip_list)
-
-    const val = 4096 - (((data - 0)/(2500 - 0)) * (4096 - 0) + 0) 
+    p2pserver.broadcast(data)
+    const val = 4096 - (((data - 0)/(2500 - 0)) * (4096 - 0) + 0)
     ip_list.forEach(async (ip)=>{
-        console.log(`http://${ip}/update/?data=${val}`)
+        let url = ""
+        try {
+            url = `http://${ip}/update/?data=${val}`
+            await fetch(url)
+        }
+        catch(err) {
+            console.error("Error occured while sending to " + url)
+        }
     })
     return res.sendStatus(200);
 });

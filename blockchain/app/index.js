@@ -1,6 +1,9 @@
 const express = require('express')
 const Blockchain = require('../chain')
 const bodyParser = require('body-parser')
+
+require('dotenv').config()
+
 const P2pServer = require('./p2p-server')
 const Kwm = require('../Kwm')
 //get the port from the user or set the default port

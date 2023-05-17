@@ -120,7 +120,8 @@ app.post("/heyy", async (req, res) => {
     });
     console.log(ip_list)
     p2pserver.broadcast(data)
-    const val = 4096 - (((data - 0)/(2500 - 0)) * (4096 - 0) + 0)
+    // const val = 4096 - (((data - 0)/(2500 - 0)) * (4096 - 0) + 0)
+    const val = (4096 - data)
     ip_list.forEach(async (ip)=>{
         let url = ""
         try {
